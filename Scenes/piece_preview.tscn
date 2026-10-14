@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://c8tetrispreview"]
+
+[ext_resource type="Script" path="res://Scripts/piece_preview.gd" id="1_preview"]
+
+[node name="PiecePreview" type="Control"]
+custom_minimum_size = Vector2(140, 60)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 140.0
+offset_bottom = 60.0
+mouse_filter = 2
+script = ExtResource("1_preview")

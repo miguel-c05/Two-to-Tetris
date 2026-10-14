@@ -1,0 +1,245 @@
+[gd_scene format=3 uid="uid://n1x5l2uyt7hy"]
+
+[ext_resource type="Script" uid="uid://8xtxjctl3pb2" path="res://Scripts/hud.gd" id="1_fccik"]
+[ext_resource type="PackedScene" uid="uid://b0jlqevs2bwo1" path="res://Scenes/piece_preview.tscn" id="2_bjfho"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.06, 0.06, 0.09, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.5)
+
+[node name="HUD" type="CanvasLayer" unique_id=448239894]
+process_mode = 3
+script = ExtResource("1_fccik")
+
+[node name="Root" type="Control" parent="." unique_id=376372186]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HoldPanel" type="PanelContainer" parent="Root" unique_id=2013055583]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 40.0
+offset_right = 460.0
+offset_bottom = 170.0
+theme_override_styles/panel = SubResource("StyleBox_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Root/HoldPanel" unique_id=637979722]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Root/HoldPanel/VBox" unique_id=946199588]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "HOLD"
+horizontal_alignment = 1
+
+[node name="HoldPreview" parent="Root/HoldPanel/VBox" unique_id=425346354 instance=ExtResource("2_bjfho")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 80)
+layout_mode = 2
+cell_size = 24
+
+[node name="StatsPanel" type="PanelContainer" parent="Root" unique_id=1836675374]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 190.0
+offset_right = 460.0
+offset_bottom = 440.0
+theme_override_styles/panel = SubResource("StyleBox_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Root/StatsPanel" unique_id=1000189788]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ScoreTitle" type="Label" parent="Root/StatsPanel/VBox" unique_id=1457056099]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.6)
+theme_override_font_sizes/font_size = 16
+text = "SCORE"
+
+[node name="ScoreValue" type="Label" parent="Root/StatsPanel/VBox" unique_id=149044262]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="LevelTitle" type="Label" parent="Root/StatsPanel/VBox" unique_id=1082850241]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.6)
+theme_override_font_sizes/font_size = 16
+text = "LEVEL"
+
+[node name="LevelValue" type="Label" parent="Root/StatsPanel/VBox" unique_id=1787514196]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="LinesTitle" type="Label" parent="Root/StatsPanel/VBox" unique_id=400189035]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.6)
+theme_override_font_sizes/font_size = 16
+text = "LINES"
+
+[node name="LinesValue" type="Label" parent="Root/StatsPanel/VBox" unique_id=2018449545]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="NextPanel" type="PanelContainer" parent="Root" unique_id=1646866691]
+layout_mode = 0
+offset_left = 820.0
+offset_top = 40.0
+offset_right = 980.0
+offset_bottom = 440.0
+theme_override_styles/panel = SubResource("StyleBox_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Root/NextPanel" unique_id=985746663]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Root/NextPanel/VBox" unique_id=618931098]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "NEXT"
+horizontal_alignment = 1
+
+[node name="Next0" parent="Root/NextPanel/VBox" unique_id=946630365 instance=ExtResource("2_bjfho")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 80)
+layout_mode = 2
+cell_size = 24
+
+[node name="Next1" parent="Root/NextPanel/VBox" unique_id=2103331602 instance=ExtResource("2_bjfho")]
+unique_name_in_owner = true
+layout_mode = 2
+cell_size = 18
+
+[node name="Next2" parent="Root/NextPanel/VBox" unique_id=186477341 instance=ExtResource("2_bjfho")]
+unique_name_in_owner = true
+layout_mode = 2
+cell_size = 18
+
+[node name="Next3" parent="Root/NextPanel/VBox" unique_id=624360094 instance=ExtResource("2_bjfho")]
+unique_name_in_owner = true
+layout_mode = 2
+cell_size = 18
+
+[node name="Next4" parent="Root/NextPanel/VBox" unique_id=1649258952 instance=ExtResource("2_bjfho")]
+unique_name_in_owner = true
+layout_mode = 2
+cell_size = 18
+
+[node name="Help" type="Label" parent="Root" unique_id=1726992762]
+layout_mode = 0
+offset_left = 1000.0
+offset_top = 460.0
+offset_right = 1270.0
+offset_bottom = 700.0
+theme_override_colors/font_color = Color(1, 1, 1, 0.55)
+theme_override_font_sizes/font_size = 14
+text = "JOGADOR 1
+← →   mover
+↓   soft drop
+↑   rodar
+K   hard drop
+J   hold
+
+Esc   pausa
+R   recomeçar"
+
+[node name="ClearLabel" type="Label" parent="Root" unique_id=104819168]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 480.0
+offset_top = 280.0
+offset_right = 800.0
+offset_bottom = 370.0
+pivot_offset = Vector2(160, 45)
+theme_override_colors/font_color = Color(1, 0.95, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PausePanel" type="ColorRect" parent="Root" unique_id=1192052266]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Label" type="Label" parent="Root/PausePanel" unique_id=1383843574]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 48
+text = "PAUSA"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GameOverPanel" type="ColorRect" parent="Root" unique_id=1514586691]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="Center" type="CenterContainer" parent="Root/GameOverPanel" unique_id=147519629]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Root/GameOverPanel/Center" unique_id=1282048888]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Root/GameOverPanel/Center/VBox" unique_id=1464442895]
+layout_mode = 2
+theme_override_font_sizes/font_size = 56
+text = "GAME OVER"
+horizontal_alignment = 1
+
+[node name="FinalScore" type="Label" parent="Root/GameOverPanel/Center/VBox" unique_id=953916480]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Pontuação: 0"
+horizontal_alignment = 1
+
+[node name="RestartButton" type="Button" parent="Root/GameOverPanel/Center/VBox" unique_id=2143035527]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 22
+text = "Recomeçar (R)"
