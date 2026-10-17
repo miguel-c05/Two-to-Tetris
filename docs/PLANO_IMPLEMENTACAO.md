@@ -401,3 +401,24 @@ Já que o objetivo final é cooperativo, vale a pena desde já:
 - **Ações com prefixo**: em vez de `move_left`, usar uma variável `@export var prefix := "p1_"` e `Input.is_action_pressed(prefix + "move_left")`. Assim o 2.º jogador é só outro mapa de teclas.
 - **Colisão entre peças ativas**: `is_valid(cells, ignore_player)` deve poder considerar também as células da peça ativa do outro jogador.
 - **Bag partilhada ou separada** e **hold partilhado ou individual** são decisões de design do mod — manter `BagRandomizer` e o hold como objetos independentes facilita testar as duas opções.
+
+---
+
+## 10. Modo cooperativo (implementado)
+
+Estrutura: `Main` (`game.gd`) guarda o que é partilhado; cada jogador é um nó `Player` (`player.gd`) filho de `Main`.
+
+| Regra | Onde |
+|---|---|
+| Tabuleiro de 16 colunas; P2 nasce na metade esquerda (coluna 4), P1 na direita (coluna 12) | `Board.cols`, `Player.spawn_center` |
+| Fila de peças partilhada: quem pousa recebe a próxima | `Game.lock_pieces()` |
+| Hold com um só slot e um só cooldown; reativa quando qualquer jogador pousa | `Game.hold()` |
+| Peças ativas colidem entre si (mover, rodar, spawn) | `Game.can_occupy()` |
+| Hard drop com o companheiro no caminho: empurra-o e pousa as duas de imediato | `Game.hard_drop()` / `_simulate_drop()` |
+| Soft drop com o companheiro por baixo: empurra-o à velocidade de soft drop | `Game.push_down()` |
+| Peça em cima de outra que ainda cai não bloqueia; só bloqueia se a de baixo estiver assente | `Game.is_supported()` |
+| Gravidade comum, aplicada de baixo para cima (peças empilhadas caem juntas) | `Game._apply_gravity()` |
+| Spawn ocupado pelo companheiro: o jogador espera até ficar livre | `Player.try_spawn_waiting()` |
+
+Controlos: P1 ← → ↓ ↑ K (hard drop) J (hold); P2 A D S W G (hard drop) F (hold); Esc pausa, R recomeça.
+

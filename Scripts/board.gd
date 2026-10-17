@@ -120,13 +120,16 @@ func render_board() -> void:
 				board_layer.set_cell(_to_layer(Vector2i(x, y)), SOURCE_ID, Vector2i(t, 0))
 
 
-func render_active(piece_cells: Array[Vector2i], ghost_cells: Array[Vector2i], type: int) -> void:
+## pieces: Array de { "cells": Array[Vector2i], "ghost": Array[Vector2i], "type": int }
+func render_active(pieces: Array) -> void:
 	piece_layer.clear()
 	ghost_layer.clear()
-	for c in ghost_cells:
-		ghost_layer.set_cell(_to_layer(c), SOURCE_ID, Vector2i(type, 0))
-	for c in piece_cells:
-		piece_layer.set_cell(_to_layer(c), SOURCE_ID, Vector2i(type, 0))
+	for piece in pieces:
+		for c in piece["ghost"]:
+			ghost_layer.set_cell(_to_layer(c), SOURCE_ID, Vector2i(piece["type"], 0))
+	for piece in pieces:
+		for c in piece["cells"]:
+			piece_layer.set_cell(_to_layer(c), SOURCE_ID, Vector2i(piece["type"], 0))
 
 
 func clear_active() -> void:

@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://4awvdul7qicl" path="res://Scripts/game.gd" id="1_game"]
 [ext_resource type="PackedScene" uid="uid://bcr7f1vqy00n5" path="res://Scenes/board.tscn" id="2_board"]
 [ext_resource type="PackedScene" uid="uid://n1x5l2uyt7hy" path="res://Scenes/hud.tscn" id="3_8gbba"]
+[ext_resource type="Script" path="res://Scripts/player.gd" id="4_player"]
 
 [node name="Main" type="Node2D" unique_id=1059118579]
 script = ExtResource("1_game")
@@ -14,6 +15,23 @@ mouse_filter = 2
 color = Color(0.12, 0.12, 0.17, 1)
 
 [node name="Board" parent="." unique_id=1376897896 instance=ExtResource("2_board")]
-position = Vector2(480, 40)
+position = Vector2(384, 40)
+cols = 16
+
+[node name="Player1" type="Node2D" parent="."]
+position = Vector2(384, 40)
+script = ExtResource("4_player")
+player_name = "P1"
+action_prefix = "p1_"
+spawn_center = 12
+tag_color = Color(1, 0.65, 0.25, 1)
+
+[node name="Player2" type="Node2D" parent="."]
+position = Vector2(384, 40)
+script = ExtResource("4_player")
+player_name = "P2"
+action_prefix = "p2_"
+spawn_center = 4
+tag_color = Color(0.4, 0.85, 1, 1)
 
 [node name="HUD" parent="." unique_id=448239894 instance=ExtResource("3_8gbba")]

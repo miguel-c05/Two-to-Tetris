@@ -30,9 +30,9 @@ mouse_filter = 2
 
 [node name="HoldPanel" type="PanelContainer" parent="Root" unique_id=2013055583]
 layout_mode = 0
-offset_left = 300.0
+offset_left = 204.0
 offset_top = 40.0
-offset_right = 460.0
+offset_right = 364.0
 offset_bottom = 170.0
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
@@ -53,9 +53,9 @@ cell_size = 24
 
 [node name="StatsPanel" type="PanelContainer" parent="Root" unique_id=1836675374]
 layout_mode = 0
-offset_left = 300.0
+offset_left = 204.0
 offset_top = 190.0
-offset_right = 460.0
+offset_right = 364.0
 offset_bottom = 440.0
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
@@ -101,9 +101,9 @@ text = "0"
 
 [node name="NextPanel" type="PanelContainer" parent="Root" unique_id=1646866691]
 layout_mode = 0
-offset_left = 820.0
+offset_left = 916.0
 offset_top = 40.0
-offset_right = 980.0
+offset_right = 1076.0
 offset_bottom = 440.0
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
@@ -143,32 +143,55 @@ unique_name_in_owner = true
 layout_mode = 2
 cell_size = 18
 
-[node name="Help" type="Label" parent="Root" unique_id=1726992762]
+[node name="HelpP1" type="Label" parent="Root"]
 layout_mode = 0
-offset_left = 1000.0
+offset_left = 916.0
 offset_top = 460.0
-offset_right = 1270.0
-offset_bottom = 700.0
-theme_override_colors/font_color = Color(1, 1, 1, 0.55)
-theme_override_font_sizes/font_size = 14
+offset_right = 1076.0
+offset_bottom = 640.0
+theme_override_colors/font_color = Color(1, 0.65, 0.25, 0.9)
+theme_override_font_sizes/font_size = 15
 text = "JOGADOR 1
 ← →   mover
 ↓   soft drop
 ↑   rodar
 K   hard drop
-J   hold
+J   hold"
 
-Esc   pausa
-R   recomeçar"
+[node name="HelpP2" type="Label" parent="Root"]
+layout_mode = 0
+offset_left = 204.0
+offset_top = 460.0
+offset_right = 364.0
+offset_bottom = 640.0
+theme_override_colors/font_color = Color(0.4, 0.85, 1, 0.9)
+theme_override_font_sizes/font_size = 15
+text = "JOGADOR 2
+A D   mover
+S   soft drop
+W   rodar
+G   hard drop
+F   hold"
+
+[node name="HelpGlobal" type="Label" parent="Root"]
+layout_mode = 0
+offset_left = 384.0
+offset_top = 688.0
+offset_right = 896.0
+offset_bottom = 712.0
+theme_override_colors/font_color = Color(1, 1, 1, 0.55)
+theme_override_font_sizes/font_size = 14
+text = "Esc  pausa     ·     R  recomeçar     ·     hold e próximas peças partilhados"
+horizontal_alignment = 1
 
 [node name="ClearLabel" type="Label" parent="Root" unique_id=104819168]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 480.0
+offset_left = 384.0
 offset_top = 280.0
-offset_right = 800.0
+offset_right = 896.0
 offset_bottom = 370.0
-pivot_offset = Vector2(160, 45)
+pivot_offset = Vector2(256, 45)
 theme_override_colors/font_color = Color(1, 0.95, 0.6, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
