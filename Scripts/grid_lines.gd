@@ -1,6 +1,6 @@
 @tool
 extends Node2D
-## Desenha a grelha e a moldura do tabuleiro (visível também no editor).
+# Grid and border of the board. It's a tool script so you can see it in the editor too.
 
 @export var cols: int = 10:
 	set(v):

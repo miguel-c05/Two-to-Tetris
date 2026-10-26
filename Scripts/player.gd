@@ -1,41 +1,42 @@
 class_name Player
 extends Node2D
-## Um jogador: a sua peça ativa, input (com prefixo próprio), DAS/ARR, soft drop e lock delay.
-## Tudo o que é partilhado (tabuleiro, fila, hold, pontuação, colisões entre peças) fica no Game.
+# One player. Owns their falling piece and handles their own keys, movement timing
+# (DAS/ARR), soft drop and lock delay. Anything both players share (board, queue,
+# hold, score, collisions between pieces) is handled by game.gd.
 
-const DAS := 0.167
-const ARR := 0.033
+const DAS := 0.167            # how long to hold left/right before it starts repeating
+const ARR := 0.033            # time between repeated moves after that
 const SOFT_DROP_FACTOR := 20.0
 const LOCK_DELAY := 0.5
-const MAX_LOCK_RESETS := 15
+const MAX_LOCK_RESETS := 15   # stops a piece from being stalled on the floor forever
 
-@export var player_name: String = "P1"
-## Prefixo das ações no Input Map ("p1_", "p2_").
-@export var action_prefix: String = "p1_"
-## Coluna central onde as peças deste jogador nascem.
-@export var spawn_center: int = 12
-@export var tag_color: Color = Color(1.0, 0.65, 0.25)
+@export var player_name := "P1"
+@export var action_prefix := "p1_"  # input actions are named p1_move_left, p2_hold, ...
+@export var spawn_center := 12      # column this player's pieces spawn around
+@export var tag_color := Color(1.0, 0.65, 0.25)
 
-var game: Node       ## Main (game.gd)
+var game: Game
 var board: Board
 var current: Piece = null
-var waiting_type: int = -1   ## peça à espera que o spawn fique livre
+# Piece we were given but couldn't place yet because the partner is in the spawn area.
+var waiting_type := -1
 
+# Needed for T-spin detection.
 var last_move_was_rotation := false
 var last_kick_index := 0
 
-var _lock_t := 0.0
+var _lock_timer := 0.0
 var _lock_resets := 0
 var _lowest_y := 0
 var _das_dir := 0
-var _das_t := 0.0
-var _arr_t := 0.0
-var _soft_t := 0.0
+var _das_timer := 0.0
+var _arr_timer := 0.0
+var _soft_drop_timer := 0.0
 
 
-func setup(g: Node, b: Board) -> void:
-	game = g
-	board = b
+func setup(owner_game: Game, the_board: Board) -> void:
+	game = owner_game
+	board = the_board
 	z_index = 10
 
 
@@ -43,18 +44,15 @@ func reset() -> void:
 	current = null
 	waiting_type = -1
 	_das_dir = 0
-	_soft_t = 0.0
+	_soft_drop_timer = 0.0
 	queue_redraw()
 
 
-# ---------------------------------------------------------------- spawn
-
+# SPAWN_X is written for a 10-wide board (centre on column 5), so shift it to our side.
 func spawn_position(type: int) -> Vector2i:
-	# SPAWN_X está pensado para um tabuleiro de 10 colunas (centro na coluna 5).
 	return Vector2i(spawn_center - 5 + PieceData.SPAWN_X[type], 0)
 
 
-## Recebe uma peça nova. Se o companheiro estiver em cima do spawn, espera.
 func spawn(type: int) -> void:
 	current = null
 	waiting_type = type
@@ -64,52 +62,47 @@ func spawn(type: int) -> void:
 func try_spawn_waiting() -> bool:
 	if waiting_type < 0:
 		return false
-	var p := Piece.new(waiting_type, spawn_position(waiting_type))
-	if not board.is_valid(p.get_cells()):
+	var piece := Piece.new(waiting_type, spawn_position(waiting_type))
+	if not board.is_valid(piece.get_cells()):
 		game.on_block_out()
 		return false
-	if not game.can_occupy(self, p.get_cells()):
-		return false  # o companheiro está no spawn: tenta outra vez no próximo frame
-	current = p
+	if not game.can_occupy(self, piece.get_cells()):
+		return false  # partner is on our spawn, try again next frame
+
+	current = piece
 	waiting_type = -1
-	_lock_t = 0.0
+	_lock_timer = 0.0
 	_lock_resets = 0
-	_soft_t = 0.0
+	_soft_drop_timer = 0.0
 	last_move_was_rotation = false
-	# Guideline: desce uma linha logo após aparecer, se puder.
+	# Guideline: the piece drops one row straight away if it can.
 	var below := current.position + Vector2i.DOWN
-	if game.can_occupy(self, current.get_cells(current.rotation, below)):
+	if game.can_occupy(self, current.cells_at(below)):
 		current.position = below
 	_lowest_y = current.position.y
 	return true
 
 
-# ---------------------------------------------------------------- input
-
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_echo() or game == null or not game.is_playing() or current == null:
 		return
-	if _pressed(event, "hard_drop"):
+	if _just_pressed(event, "hard_drop"):
 		game.hard_drop(self)
-	elif _pressed(event, "rotate_cw"):
+	elif _just_pressed(event, "rotate_cw"):
 		try_rotate(1)
-	elif _pressed(event, "rotate_ccw"):
-		try_rotate(-1)
-	elif _pressed(event, "rotate_180"):
-		try_rotate(2)
-	elif _pressed(event, "hold"):
+	elif _just_pressed(event, "hold"):
 		game.hold(self)
 
 
-## Chamado pelo Game a cada frame (a ordem entre jogadores é controlada lá).
+# Called by the game every frame (the game decides the order between players).
 func tick(delta: float) -> void:
-	position = board.position  # acompanha o abanão do tabuleiro
+	position = board.position  # follow the board when it shakes
 	if current == null:
 		try_spawn_waiting()
 	if current == null:
 		queue_redraw()
 		return
-	_handle_horizontal(delta)
+	_handle_left_right(delta)
 	if current == null or not game.is_playing():
 		return
 	_handle_soft_drop(delta)
@@ -123,28 +116,34 @@ func is_soft_dropping() -> bool:
 	return _held("soft_drop")
 
 
-# ---------------------------------------------------------------- movimento
-
-func try_move(d: Vector2i, by_player: bool = true) -> bool:
+func try_move(offset: Vector2i, by_player: bool = true) -> bool:
 	var was_grounded := is_grounded()
-	var p := current.position + d
-	if not game.can_occupy(self, current.get_cells(current.rotation, p)):
+	var target := current.position + offset
+	if not game.can_occupy(self, current.cells_at(target)):
 		return false
-	current.position = p
+	current.position = target
 	last_move_was_rotation = false
-	_after_manipulation(was_grounded, by_player)
+	_after_move(was_grounded, by_player)
 	return true
 
 
-## Desce uma linha sem testar colisões (usado pelo Game quando empurra um grupo de peças).
+# Moves down one row without checking anything. The game already checked the
+# whole group of pieces before pushing them.
 func shift_down() -> void:
 	var was_grounded := is_grounded()
 	current.position += Vector2i.DOWN
 	last_move_was_rotation = false
-	_after_manipulation(was_grounded, false)
+	_after_move(was_grounded, false)
 
 
-## dir: 1 = horário, -1 = anti-horário, 2 = 180º
+# Used by hard drop to teleport the piece to where it lands.
+func drop_to(target: Vector2i) -> void:
+	if target != current.position:
+		current.position = target
+		last_move_was_rotation = false
+
+
+# dir 1 = clockwise, -1 = counter-clockwise. Tries every SRS kick in order.
 func try_rotate(dir: int) -> bool:
 	if current == null or current.type == PieceData.Type.O:
 		return false
@@ -153,20 +152,19 @@ func try_rotate(dir: int) -> bool:
 	var to := posmod(from + dir, 4)
 	var kicks := PieceData.get_kicks(current.type, from, to)
 	for i in kicks.size():
-		var p: Vector2i = current.position + kicks[i]
-		if game.can_occupy(self, current.get_cells(to, p)):
+		var target: Vector2i = current.position + kicks[i]
+		if game.can_occupy(self, current.cells_at(target, to)):
 			current.rotation = to
-			current.position = p
+			current.position = target
 			last_move_was_rotation = true
 			last_kick_index = i
-			_after_manipulation(was_grounded, true)
+			_after_move(was_grounded, true)
 			return true
 	return false
 
 
-## Apoiado = assente no tabuleiro, ou em cima da peça do companheiro que, por sua vez,
-## está apoiada. Uma peça em cima de outra que ainda está a cair NÃO conta, por isso
-## nunca fica bloqueada a flutuar.
+# Resting on the floor/stack, or on the partner's piece if that one is resting too.
+# Sitting on a piece that is still falling doesn't count, otherwise you'd lock in mid-air.
 func is_grounded() -> bool:
 	return game.is_supported(self, [])
 
@@ -175,98 +173,115 @@ func get_cells() -> Array[Vector2i]:
 	return current.get_cells() if current else ([] as Array[Vector2i])
 
 
-# ---------------------------------------------------------------- internos
+# Three-corner rule. Only the locked stack counts as filled, not the other player's piece.
+func detect_tspin() -> Scoring.Spin:
+	if current.type != PieceData.Type.T or not last_move_was_rotation:
+		return Scoring.Spin.NONE
+	var corners: Array[Vector2i] = [Vector2i(0, 0), Vector2i(2, 0), Vector2i(2, 2), Vector2i(0, 2)]
+	# The two corners on the side the T points to, for each rotation (up, right, down, left).
+	var front_corners: Array = [[0, 1], [1, 2], [2, 3], [3, 0]]
+	var filled := 0
+	var front := 0
+	for i in 4:
+		if not board.is_free(current.position + corners[i]):
+			filled += 1
+			if i in front_corners[current.rotation]:
+				front += 1
+	if filled < 3:
+		return Scoring.Spin.NONE
+	if front == 2 or last_kick_index == 4:
+		return Scoring.Spin.FULL
+	return Scoring.Spin.MINI
 
-func _pressed(event: InputEvent, action: String) -> bool:
-	var a := action_prefix + action
-	return InputMap.has_action(a) and event.is_action_pressed(a)
+
+func _just_pressed(event: InputEvent, action: String) -> bool:
+	var full_name := action_prefix + action
+	return InputMap.has_action(full_name) and event.is_action_pressed(full_name)
 
 
 func _held(action: String) -> bool:
-	var a := action_prefix + action
-	return InputMap.has_action(a) and Input.is_action_pressed(a)
+	var full_name := action_prefix + action
+	return InputMap.has_action(full_name) and Input.is_action_pressed(full_name)
 
 
-func _handle_horizontal(delta: float) -> void:
+func _handle_left_right(delta: float) -> void:
 	var dir := int(_held("move_right")) - int(_held("move_left"))
 	if dir != _das_dir:
+		# Direction changed: move once now, then wait DAS before repeating.
 		_das_dir = dir
-		_das_t = 0.0
-		_arr_t = 0.0
+		_das_timer = 0.0
+		_arr_timer = 0.0
 		if dir != 0:
 			try_move(Vector2i(dir, 0))
 		return
 	if dir == 0:
 		return
-	_das_t += delta
-	if _das_t < DAS:
+	_das_timer += delta
+	if _das_timer < DAS:
 		return
-	_arr_t += delta
-	while _arr_t >= ARR:
-		_arr_t -= ARR
+	_arr_timer += delta
+	while _arr_timer >= ARR:
+		_arr_timer -= ARR
 		if not try_move(Vector2i(dir, 0)):
-			_arr_t = 0.0
+			_arr_timer = 0.0
 			break
 
 
-## Soft drop: desce à velocidade de soft drop e, se a peça do companheiro estiver
-## por baixo, empurra-a também (o Game trata do grupo).
+# Soft drop goes through the game so it can push the partner's piece along.
 func _handle_soft_drop(delta: float) -> void:
 	if not is_soft_dropping():
-		_soft_t = 0.0
+		_soft_drop_timer = 0.0
 		return
 	var interval: float = game.gravity_interval() / SOFT_DROP_FACTOR
-	_soft_t += delta
-	while _soft_t >= interval and current != null:
-		_soft_t -= interval
+	_soft_drop_timer += delta
+	while _soft_drop_timer >= interval and current != null:
+		_soft_drop_timer -= interval
 		if game.push_down(self):
 			game.add_drop_points(1)
 		else:
-			_soft_t = 0.0
+			_soft_drop_timer = 0.0
 			break
 
 
 func _update_lock(delta: float) -> void:
 	if not is_grounded():
-		_lock_t = 0.0
+		_lock_timer = 0.0
 		return
-	_lock_t += delta
-	if _lock_t >= LOCK_DELAY or _lock_resets >= MAX_LOCK_RESETS:
+	_lock_timer += delta
+	if _lock_timer >= LOCK_DELAY or _lock_resets >= MAX_LOCK_RESETS:
 		game.lock_pieces([self])
 
 
-## Regras de reset do lock delay (Extended Placement).
-func _after_manipulation(was_grounded: bool, by_player: bool) -> void:
+# Lock delay resets: reaching a new lowest row gives a full reset, moving or rotating
+# while on the ground resets the timer but uses up one of the 15 resets.
+func _after_move(was_grounded: bool, by_player: bool) -> void:
 	if current.position.y > _lowest_y:
 		_lowest_y = current.position.y
 		_lock_resets = 0
-		_lock_t = 0.0
+		_lock_timer = 0.0
 	elif by_player and was_grounded:
-		_lock_t = 0.0
+		_lock_timer = 0.0
 		_lock_resets += 1
 
 
-# ---------------------------------------------------------------- desenho
-
-## Contorno colorido nas células da peça + etiqueta com o nome do jogador.
+# Coloured outline on the piece plus a small P1/P2 tag above it.
 func _draw() -> void:
 	if current == null or game == null or not game.is_playing():
 		return
 	var cells := current.get_cells()
-	var top := Vector2i(999, 999)
+	var top_y := 999
 	var min_x := 999
 	var max_x := -999
 	for c in cells:
-		var r := Rect2(Vector2(c.x, c.y - Board.HIDDEN) * Board.CELL, Vector2(Board.CELL, Board.CELL))
-		draw_rect(r.grow(-1), tag_color, false, 2.0)
-		if c.y < top.y:
-			top = c
+		var rect := Rect2(Vector2(c.x, c.y - Board.HIDDEN) * Board.CELL, Vector2(Board.CELL, Board.CELL))
+		draw_rect(rect.grow(-1), tag_color, false, 2.0)
+		top_y = mini(top_y, c.y)
 		min_x = mini(min_x, c.x)
 		max_x = maxi(max_x, c.x)
 	var font := ThemeDB.fallback_font
-	var fs := 14
-	var text_w := font.get_string_size(player_name, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	var cx := (min_x + max_x + 1) * 0.5 * Board.CELL
-	var y := (top.y - Board.HIDDEN) * Board.CELL - 5
-	draw_string_outline(font, Vector2(cx - text_w / 2.0, y), player_name, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 4, Color.BLACK)
-	draw_string(font, Vector2(cx - text_w / 2.0, y), player_name, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, tag_color)
+	var font_size := 14
+	var text_w := font.get_string_size(player_name, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var x := (min_x + max_x + 1) * 0.5 * Board.CELL - text_w / 2.0
+	var y := (top_y - Board.HIDDEN) * Board.CELL - 5
+	draw_string_outline(font, Vector2(x, y), player_name, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 4, Color.BLACK)
+	draw_string(font, Vector2(x, y), player_name, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, tag_color)

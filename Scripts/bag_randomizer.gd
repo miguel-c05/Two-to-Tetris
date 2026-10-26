@@ -1,11 +1,13 @@
 class_name BagRandomizer
 extends RefCounted
-## Randomizer 7-bag: cada "saco" contém as 7 peças baralhadas.
+# 7-bag randomizer: pieces come out in shuffled bags that contain each shape once,
+# so you never wait more than 12 pieces for an I.
 
 var _queue: Array[int] = []
 var _rng := RandomNumberGenerator.new()
 
 
+# Pass a seed to get the same sequence every time (handy for testing/recording).
 func reset(seed_value: int = -1) -> void:
 	_queue.clear()
 	if seed_value >= 0:
@@ -14,26 +16,24 @@ func reset(seed_value: int = -1) -> void:
 		_rng.randomize()
 
 
-## Devolve a próxima peça e remove-a da fila.
 func next() -> int:
-	_ensure(PieceData.COUNT + 1)
+	_fill_to(PieceData.COUNT + 1)
 	return _queue.pop_front()
 
 
-## Devolve as `n` peças seguintes sem as remover.
 func peek(n: int) -> Array[int]:
-	_ensure(n)
+	_fill_to(n)
 	return _queue.slice(0, n)
 
 
-func _ensure(n: int) -> void:
+func _fill_to(n: int) -> void:
 	while _queue.size() < n:
-		_refill()
+		_add_bag()
 
 
-func _refill() -> void:
+func _add_bag() -> void:
 	var bag: Array[int] = [0, 1, 2, 3, 4, 5, 6]
-	# Fisher-Yates com o nosso RNG (permite seeds reprodutíveis).
+	# Fisher-Yates with our own RNG instead of shuffle(), so seeds work.
 	for i in range(bag.size() - 1, 0, -1):
 		var j := _rng.randi_range(0, i)
 		var tmp := bag[i]

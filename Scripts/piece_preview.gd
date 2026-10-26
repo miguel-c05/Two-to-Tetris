@@ -1,6 +1,6 @@
 @tool
 extends Control
-## Mostra uma peça centrada (usado no Hold e na fila Next).
+# Draws a single piece centred in the control. Used for the Hold box and the Next queue.
 
 const BLOCKS := preload("res://Assets/blocks.png")
 const TEX_CELL := 32
@@ -9,14 +9,10 @@ const TEX_CELL := 32
 	set(v):
 		cell_size = v
 		queue_redraw()
-@export var type: int = -1:
+@export var type: int = -1:  # -1 = empty
 	set(v):
 		type = v
 		queue_redraw()
-
-
-func set_piece(t: int) -> void:
-	type = t
 
 
 func _draw() -> void:
@@ -32,5 +28,5 @@ func _draw() -> void:
 	var offset := (size - piece_size) / 2.0
 	var src := Rect2(type * TEX_CELL, 0, TEX_CELL, TEX_CELL)
 	for c in shape:
-		var p := offset + Vector2(c - min_c) * cell_size
-		draw_texture_rect_region(BLOCKS, Rect2(p, Vector2(cell_size, cell_size)), src)
+		var pos := offset + Vector2(c - min_c) * cell_size
+		draw_texture_rect_region(BLOCKS, Rect2(pos, Vector2(cell_size, cell_size)), src)

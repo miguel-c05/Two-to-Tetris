@@ -1,7 +1,8 @@
 extends CanvasLayer
-## Interface: hold, next, pontuação, mensagens de linhas, pausa e game over.
+# HUD: hold and next previews, score, line clear messages, pause and game over.
+# It only listens to the game's signals, it never changes the game state itself.
 
-@onready var game: Node = get_parent()
+@onready var game: Game = get_parent()
 @onready var hold_preview: Control = %HoldPreview
 @onready var next_previews: Array[Control] = [%Next0, %Next1, %Next2, %Next3, %Next4]
 @onready var score_label: Label = %ScoreValue
@@ -25,7 +26,7 @@ func _ready() -> void:
 	game.paused_changed.connect(_on_paused_changed)
 	restart_button.pressed.connect(game.new_game)
 	clear_label.modulate.a = 0.0
-	# Sincroniza com o estado atual (o jogo pode ter arrancado antes do HUD).
+	# The game is set up before the HUD is ready, so catch up with its current state.
 	_on_stats_changed(game.score, game.level, game.lines)
 	_on_hold_changed(game.hold_type, game.can_hold)
 	_on_next_changed(game.bag.peek(next_previews.size()))
@@ -38,13 +39,13 @@ func _on_stats_changed(score: int, level: int, lines: int) -> void:
 
 
 func _on_hold_changed(type: int, can_hold: bool) -> void:
-	hold_preview.set_piece(type)
+	hold_preview.type = type
 	hold_preview.modulate = Color.WHITE if can_hold else Color(1, 1, 1, 0.35)
 
 
 func _on_next_changed(types: Array[int]) -> void:
 	for i in next_previews.size():
-		next_previews[i].set_piece(types[i] if i < types.size() else -1)
+		next_previews[i].type = types[i] if i < types.size() else -1
 
 
 func _on_line_clear(text: String) -> void:
@@ -59,7 +60,7 @@ func _on_line_clear(text: String) -> void:
 
 
 func _on_game_over(final_score: int) -> void:
-	final_score_label.text = "Pontuação: %d" % final_score
+	final_score_label.text = "Score: %d" % final_score
 	game_over_panel.visible = true
 	restart_button.grab_focus()
 
