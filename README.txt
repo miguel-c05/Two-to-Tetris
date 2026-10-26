@@ -40,19 +40,26 @@ CONTROLS
 DELIVERY CONTENTS
   1_Poster/TTTT_poster_A2.pdf      A2 poster
   2_Video/TTTT_gameplay.mp4        Gameplay video (H.264, about 2 min)
-  3_Executable_Web/                Web/HTML5 build
+  2_Video/VIDEO_LINK.txt           Link to the same video on YouTube
+  3_Executable_Web/GAME_LINK.txt   Link to the playable web version on itch.io
   4_Godot_Project/                 Godot source project
 
 
-RUNNING THE WEB BUILD
-Browsers block games opened straight from disk (file://), so double-clicking
-index.html will not work. Serve the folder with any local web server, e.g.:
+PLAYING THE GAME (WEB)
+We could not get the exported HTML5 files to work reliably when run from a
+folder, so instead of including them we published the web build on itch.io,
+where it runs directly in the browser with nothing to install:
 
-  cd 3_Executable_Web
-  python -m http.server 8000
+  https://miguel-c05.itch.io/takes-two-to-tetris
 
-and open http://localhost:8000 in a browser (Chrome or Firefox).
-Both players use the same keyboard.
+Use Chrome or Firefox on a computer. Both players share the same keyboard.
+Click the game once so it gets keyboard focus.
+
+
+GAMEPLAY VIDEO
+The video is included in 2_Video. The same video is also on YouTube:
+
+  https://www.youtube.com/watch?v=cC1sQapefLA
 
 
 OPENING THE SOURCE PROJECT
