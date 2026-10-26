@@ -17,13 +17,24 @@ piece down with yours. Two pieces locking together can clear more than four
 lines at once.
 
 
+START MENU
+The game opens on a start screen where you pick the starting level (1 to 15).
+Higher levels start with faster gravity; the level still goes up every 10 lines.
+
+  <- -> or A D   change the starting level
+  Enter / Space  start (or click START)
+
+When the game is over you can restart at the same level (R) or go back to the
+start menu (Esc) to pick another one.
+
+
 CONTROLS
                 Move    Soft drop   Rotate   Hard drop   Hold
   Player 1      <- ->   Down        Up       K           J
   Player 2      A  D    S           W        G           F
 
-  Esc  pause
-  R    restart
+  Esc  pause (on the game over screen: back to the start menu)
+  R    restart at the same level
 
 
 DELIVERY CONTENTS
@@ -57,5 +68,6 @@ Scripts/
   piece_data.gd      shapes and SRS wall kick tables
   bag_randomizer.gd  7-bag piece randomizer
   hud.gd             interface (hold, next, score, pause, game over)
+  start_menu.gd      start screen where the starting level is chosen
   piece_preview.gd   draws a piece in the Hold/Next boxes
   grid_lines.gd      board grid

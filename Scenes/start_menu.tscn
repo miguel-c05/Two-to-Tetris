@@ -1,0 +1,101 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/start_menu.gd" id="1_menu"]
+
+[node name="StartMenu" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.07, 0.07, 0.11, 1)
+
+[node name="Center" type="CenterContainer" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Background/Center"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Logo" type="RichTextLabel" parent="Background/Center/VBox"]
+custom_minimum_size = Vector2(700, 0)
+layout_mode = 2
+bbcode_enabled = true
+text = "[center][b][color=#00f0f0]T[/color][color=#f0f000]T[/color][color=#b44cff]T[/color][color=#f0a000]T[/color][/b][/center]"
+fit_content = true
+scroll_active = false
+theme_override_font_sizes/bold_font_size = 150
+
+[node name="Subtitle" type="Label" parent="Background/Center/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+text = "TAKES TWO TO TETRIS"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Background/Center/VBox"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+
+[node name="LevelTitle" type="Label" parent="Background/Center/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.63, 0.63, 0.71, 1)
+theme_override_font_sizes/font_size = 22
+text = "STARTING LEVEL"
+horizontal_alignment = 1
+
+[node name="LevelRow" type="HBoxContainer" parent="Background/Center/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="LevelDown" type="Button" parent="Background/Center/VBox/LevelRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+theme_override_font_sizes/font_size = 28
+text = "<"
+
+[node name="LevelValue" type="Label" parent="Background/Center/VBox/LevelRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 60
+text = "1"
+horizontal_alignment = 1
+
+[node name="LevelUp" type="Button" parent="Background/Center/VBox/LevelRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+theme_override_font_sizes/font_size = 28
+text = ">"
+
+[node name="StartButton" type="Button" parent="Background/Center/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_font_sizes/font_size = 26
+text = "START"
+
+[node name="Hint" type="Label" parent="Background/Center/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.63, 0.63, 0.71, 1)
+theme_override_font_sizes/font_size = 16
+text = "← →  or  A D   change level     ·     Enter   start"
+horizontal_alignment = 1

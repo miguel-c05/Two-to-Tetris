@@ -266,3 +266,11 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 22
 text = "Restart (R)"
+
+[node name="MenuButton" type="Button" parent="Root/GameOverPanel/Center/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 22
+text = "Main Menu (Esc)"

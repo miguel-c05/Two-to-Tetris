@@ -13,6 +13,7 @@ extends CanvasLayer
 @onready var game_over_panel: Control = %GameOverPanel
 @onready var final_score_label: Label = %FinalScore
 @onready var restart_button: Button = %RestartButton
+@onready var menu_button: Button = %MenuButton
 
 var _clear_tween: Tween
 
@@ -24,7 +25,10 @@ func _ready() -> void:
 	game.line_clear.connect(_on_line_clear)
 	game.game_over.connect(_on_game_over)
 	game.paused_changed.connect(_on_paused_changed)
+	game.started.connect(_hide_overlays)
+	game.menu_opened.connect(_hide_overlays)
 	restart_button.pressed.connect(game.new_game)
+	menu_button.pressed.connect(game.open_menu)
 	clear_label.modulate.a = 0.0
 	# The game is set up before the HUD is ready, so catch up with its current state.
 	_on_stats_changed(game.score, game.level, game.lines)
@@ -67,5 +71,9 @@ func _on_game_over(final_score: int) -> void:
 
 func _on_paused_changed(paused: bool) -> void:
 	pause_panel.visible = paused
-	if not paused:
-		game_over_panel.visible = false
+
+
+func _hide_overlays() -> void:
+	pause_panel.visible = false
+	game_over_panel.visible = false
+	clear_label.modulate.a = 0.0

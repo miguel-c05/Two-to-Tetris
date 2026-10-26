@@ -10,8 +10,10 @@ signal next_changed(types: Array[int])
 signal line_clear(text: String)
 signal game_over(final_score: int)
 signal paused_changed(paused: bool)
+signal started
+signal menu_opened
 
-enum State { PLAYING, PAUSED, GAME_OVER }
+enum State { MENU, PLAYING, PAUSED, GAME_OVER }
 
 const NEXT_COUNT := 5
 
@@ -20,7 +22,7 @@ const NEXT_COUNT := 5
 @onready var board: Board = $Board
 
 var players: Array[Player] = []
-var state := State.PLAYING
+var state := State.MENU
 var bag := BagRandomizer.new()
 var scoring := Scoring.new()
 var hold_type := -1
@@ -48,7 +50,22 @@ func _ready() -> void:
 		if child is Player:
 			players.append(child)
 			child.setup(self, board)
+	open_menu()
+
+
+# Called by the start menu with the level the players picked.
+func start(level: int) -> void:
+	start_level = level
 	new_game()
+
+
+# Back to the start screen. The board is cleared and nothing runs until start().
+func open_menu() -> void:
+	state = State.MENU
+	board.reset()
+	for p in players:
+		p.reset()
+	menu_opened.emit()
 
 
 func new_game() -> void:
@@ -66,7 +83,7 @@ func new_game() -> void:
 	stats_changed.emit(score, level, lines)
 	hold_changed.emit(hold_type, can_hold)
 	next_changed.emit(bag.peek(NEXT_COUNT))
-	paused_changed.emit(false)
+	started.emit()
 	_render()
 
 
@@ -75,12 +92,15 @@ func is_playing() -> bool:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_echo():
+	if event.is_echo() or state == State.MENU:
 		return
 	if event.is_action_pressed("restart"):
 		new_game()
 	elif event.is_action_pressed("pause"):
-		toggle_pause()
+		if state == State.GAME_OVER:
+			open_menu()
+		else:
+			toggle_pause()
 
 
 func _process(delta: float) -> void:

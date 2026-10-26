@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://bcr7f1vqy00n5" path="res://Scenes/board.tscn" id="2_board"]
 [ext_resource type="PackedScene" uid="uid://n1x5l2uyt7hy" path="res://Scenes/hud.tscn" id="3_8gbba"]
 [ext_resource type="Script" path="res://Scripts/player.gd" id="4_player"]
+[ext_resource type="PackedScene" path="res://Scenes/start_menu.tscn" id="5_menu"]
 
 [node name="Main" type="Node2D" unique_id=1059118579]
 script = ExtResource("1_game")
@@ -35,3 +36,5 @@ spawn_center = 4
 tag_color = Color(0.4, 0.85, 1, 1)
 
 [node name="HUD" parent="." unique_id=448239894 instance=ExtResource("3_8gbba")]
+
+[node name="StartMenu" parent="." instance=ExtResource("5_menu")]
